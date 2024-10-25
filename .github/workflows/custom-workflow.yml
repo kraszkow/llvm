@@ -1,0 +1,36 @@
+name: ___Build LLVM Compiler
+
+on:
+    push:
+    pull_request:
+ 
+jobs:
+    build-llvm:
+      runs-on: ubuntu-latest
+      container:
+        image: ubuntu:22.04
+  
+      steps:
+        # Checkout the code from the LLVM repository
+        - name: Checkout code
+          uses: actions/checkout@v3
+  
+        # Update package manager and install dependencies
+        - name: Install Dependencies
+          run: |
+            apt-get update && \
+            apt-get install -y build-essential cmake ninja-build python3 git
+  
+        # Configure and build LLVM
+        - name: Configure and Build LLVM
+          run: |
+            mkdir build && cd build && \
+            cmake -G Ninja -DLLVM_ENABLE_PROJECTS='clang;lld;compiler-rt' \
+                  -DCMAKE_BUILD_TYPE=Release ../llvm && \
+            ninja
+  
+        # Run tests (optional)
+        - name: Run Tests
+          run: |
+            cd build && \
+            ninja check-llvm
